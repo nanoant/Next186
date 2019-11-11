@@ -40,18 +40,24 @@ module ulx3s_next186(
 	//mmc_n_cs
 	inout [3:0] sd_d,
 	output sd_clk,  // mmc_clk
-	output sd_cmd  //mmc_mosiun
+	output sd_cmd,  //mmc_mosiun
 	//mmc_miso
 
-//	-- PS2 interface (Both ports accessible via Y-splitter cable)
-//	output led[7] //PS2_enable1,
-//	inout led[6] //PS2_clk1,
-//	inout led[5] //PS2_data1,
-//	inout led[4] //PS2_clk2,
-//	inout led[3] //PS2_data2 
+//	-- PS2 interface
+        output usb_fpga_pu_dp, usb_fpga_pu_dn,
+        inout  usb_fpga_dp, usb_fpga_dn,
+        output wifi_gpio0
     );
+        parameter C_ddr = 1'b1; // 0:SDR 1:DDR
 
-    parameter C_ddr = 1'b1; // 0:SDR 1:DDR
+    	assign wifi_gpio0 = 1'b1; // for ULX3S with ESP32 firmware
+
+        // enable pull ups for PS/2 on both D+ and D-
+        assign usb_fpga_pu_dp = 1'b1; 
+        assign usb_fpga_pu_dn = 1'b1;
+
+        // wire ps2clk  = usb_fpga_dp;
+        // wire ps2data = usb_fpga_dn;
 	
 	assign sdram_cke = 1'b1; 	// -- DRAM clock enable
 	assign wifi_gpio0 = 1'b1; 	// pull both USB ports D+ and D- to +3.3vcc through 15K resistors
@@ -66,7 +72,6 @@ module ulx3s_next186(
 	system sys_inst
 	( 
 		.CLK_IN(clk_25mhz),
-		//.TMDS({gpdi_dp[3], gpdi_dp[0], gpdi_dp[1], gpdi_dp[2]}),
 
 		.clk_pixel_x5(clk_shift),
 		.vga_r(vga_r),
@@ -83,8 +88,8 @@ module ulx3s_next186(
 		.sdr_DATA(sdram_d),
 		.sdr_DQM({sdram_dqm[1], sdram_dqm[0]}),
 		.LED(LED),
-		.BTN_RESET(btn[0]),
-		.BTN_NMI(!btn[1]),	
+		.BTN_RESET(!btn[0]),
+		.BTN_NMI(btn[1]),
 		.RS232_DCE_RXD(ftdi_txd),
 		.RS232_DCE_TXD(ftdi_rxd),
 		.SD_n_CS(sd_d[3]),
@@ -95,9 +100,11 @@ module ulx3s_next186(
 		.AUD_L(audio_l[0]),
 		.AUD_R(audio_r[0]),
 
-		.PS2_CLK1(),
+		// Keyboard
+		.PS2_CLK1(usb_fpga_dp),
+		.PS2_DATA1(usb_fpga_dn),
+		// Mouse
 		.PS2_CLK2(),
-		.PS2_DATA1(),
 		.PS2_DATA2(),
 		
 		.RS232_HOST_RXD(),
