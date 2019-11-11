@@ -1,7 +1,7 @@
 module ulx3s_next186(
 //    -- System clock and reset
 	input clk_25mhz, // main clock input from external clock source
-        input [6:0]btn, // main clock input from external RC reset circuit
+        input [6:0]btn, // BTN0=RESET, BTN1=NMI
 
 //    -- On-board user buttons and status LEDs
 	output [7:0]led,
@@ -12,17 +12,14 @@ module ulx3s_next186(
 	inout gpdi_sda,
 	inout gpdi_scl,
 	
-// Unknown	output [3:0]AD_EOUT,
-// Unknown	input [3:0]AD_FB,
-
-//    -- USB Slave (FT230x) interface 
+//    -- USB-serial FT231x interface 
 	input  ftdi_txd,
 	output ftdi_rxd,
 	 
 //	-- SDRAM interface (For use with 16Mx16bit or 32Mx16bit SDR DRAM, depending on version)
 	output sdram_clk,	// clock to SDRAM
 	output sdram_cke,	// clock to SDRAM	
-	output sdram_rasn,  // SDRAM RAS
+	output sdram_rasn,	// SDRAM RAS
 	output sdram_casn,	// SDRAM CAS
 	output sdram_wen,	// SDRAM write-enable
 	output  [1:0] sdram_ba,	// SDRAM bank-address
@@ -50,19 +47,13 @@ module ulx3s_next186(
     );
         parameter C_ddr = 1'b1; // 0:SDR 1:DDR
 
-    	assign wifi_gpio0 = 1'b1; // for ULX3S with ESP32 firmware
+    	assign wifi_gpio0 = btn[0]; // for ULX3S with ESP32 firmware
 
         // enable pull ups for PS/2 on both D+ and D-
         assign usb_fpga_pu_dp = 1'b1; 
         assign usb_fpga_pu_dn = 1'b1;
 
-        // wire ps2clk  = usb_fpga_dp;
-        // wire ps2data = usb_fpga_dn;
-	
 	assign sdram_cke = 1'b1; 	// -- DRAM clock enable
-	assign wifi_gpio0 = 1'b1; 	// pull both USB ports D+ and D- to +3.3vcc through 15K resistors
-	wire [3:0]LED;
-	assign n_led1 = LED[1];
 
 	wire [5:0] vga_r, vga_g, vga_b;
 	wire vga_hsync, vga_vsync, vga_blank;
@@ -87,7 +78,7 @@ module ulx3s_next186(
 		.sdr_ADDR(sdram_a),
 		.sdr_DATA(sdram_d),
 		.sdr_DQM({sdram_dqm[1], sdram_dqm[0]}),
-		.LED(LED),
+		.LED(led[3:0]),
 		.BTN_RESET(!btn[0]),
 		.BTN_NMI(btn[1]),
 		.RS232_DCE_RXD(ftdi_txd),
