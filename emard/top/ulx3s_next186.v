@@ -46,6 +46,11 @@ module ulx3s_next186(
         output wifi_gpio0
     );
         parameter C_ddr = 1'b1; // 0:SDR 1:DDR
+        parameter C_loudness = 0; // 0-3 but
+        // 2 and 3 produce unbootable bitstream
+        // 1 boots but is unstable, occassional illegal istruction
+        // 0 works most stable, only the sound is very quiet
+        // design is overcrowded and works by LUCK
 
     	assign wifi_gpio0 = btn[0]; // for ULX3S with ESP32 firmware
 
@@ -88,8 +93,8 @@ module ulx3s_next186(
 		.SD_CK(sd_clk),
 		.SD_DO(sd_d[0]),
 		
-		.AUD_L(audio_l[0]),
-		.AUD_R(audio_r[0]),
+		.AUD_L(audio_l[C_loudness]),
+		.AUD_R(audio_r[C_loudness]),
 
 		// Keyboard
 		.PS2_CLK1(usb_fpga_dp),
