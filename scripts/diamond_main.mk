@@ -163,19 +163,15 @@ $(BOARD)_$(FPGA_SIZE)f_$(PROJECT).bit: project/project_project.bit
 
 $(CLK0_FILE_NAME):
 	LANG=C LD_LIBRARY_PATH=$(LIBTRELLIS) $(ECPPLL) $(CLK0_OPTIONS) --file $@
-	#sed -e "s/module pll(/module $(CLK0_NAME)(/g" -i $@
 
 $(CLK1_FILE_NAME):
 	LANG=C LD_LIBRARY_PATH=$(LIBTRELLIS) $(ECPPLL) $(CLK1_OPTIONS) --file $@
-	#sed -e "s/module pll(/module $(CLK1_NAME)(/g" -i $@
 
 $(CLK2_FILE_NAME):
 	LANG=C LD_LIBRARY_PATH=$(LIBTRELLIS) $(ECPPLL) $(CLK2_OPTIONS) --file $@
-	#sed -e "s/module pll(/module $(CLK2_NAME)(/g" -i $@
 
 $(CLK3_FILE_NAME):
 	LANG=C LD_LIBRARY_PATH=$(LIBTRELLIS) $(ECPPLL) $(CLK3_OPTIONS) --file $@
-	#sed -e "s/module pll(/module $(CLK3_NAME)(/g" -i $@
 
 # generate sram programming XCF file for DDTCMD
 $(BOARD)_$(FPGA_SIZE)f.xcf: $(BOARD)_$(FPGA_SIZE)f_$(PROJECT).bit $(SCRIPTS)/$(BOARD)_sram.xcf $(SCRIPTS)/xcf.xsl
@@ -239,7 +235,7 @@ flash_tiny: $(BOARD)_$(FPGA_SIZE)f_$(PROJECT).bit
 	$(TINYFPGASP) -w $<
 
 # generate chip-specific openocd programming file
-$(BOARD)_$(FPGA_SIZE)f.ocd: makefile $(SCRIPTS)/ecp5-ocd.sh
+$(BOARD)_$(FPGA_SIZE)f.ocd: $(SCRIPTS)/ecp5-ocd.sh
 	$(SCRIPTS)/ecp5-ocd.sh $(CHIP_ID) $(BOARD)_$(FPGA_SIZE)f_$(PROJECT).svf > $@
 
 # program SRAM with OPENOCD

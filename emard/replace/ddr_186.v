@@ -146,10 +146,15 @@
 
 module system
 	(
-		 input CLK_IN,
-		 output sdr_CLK_out,
+		 input clk_cpu,      //  50-75 MHz x186 CPU
+		 input clk_pixel,    //  25 MHz VIDEO
+		 input clk_sdr,      // 125-166 MHz SDRAM
+		 input clk_dsp,      //  25-80 MHz (>=clk_cpu/2) 32-bit
+		 input clk_audio,    //  11.2896 MHz (44100*256)
+		 input clk_uart,     //  29.4912 MHz
+		 input clk_beep,     //  25 MHz for beep timer
+
 		 output [3:0]TMDS,
-		 output clk_pixel_x5,
 		 output [5:0] vga_r, vga_g, vga_b,
 		 output vga_hsync, vga_vsync, vga_blank,
 		 output [3:0]sdr_n_CS_WE_RAS_CAS,
@@ -182,9 +187,6 @@ module system
 		 
 		 inout [7:0]GPIO
     );
-
-	wire clk_25;
-	wire clk_125;
 	wire [15:0]cntrl0_user_input_data;//i
 	wire [1:0]sys_cmd_ack;
 	wire sys_rd_data_valid;
@@ -411,44 +413,15 @@ module system
 							 ({8{COM1_PORT}} & COM1_DOUT) | 
 							 ({8{OPL3_PORT}} & opl32_data) ;
 
-	dcm dcm_system 
-	(
-		.CLKI(CLK_IN),
-		.CLKOP(clk_25), 
-		.CLKOS(clk_125), 
-		.CLKOS2(clk_sdr),
-		.CLKOS3(sdr_CLK_out)
-    );
-	
-	dcm1 dcm_aux
-	(
-		.CLKI(CLK_IN),
-		.CLKOP(clk_dsp),
-		.CLKOS(CLK29491200),
-		.CLKOS2(CLK44100x256),
-		.CLKOS3(clk_cpu)
-	);
-	/*
-	HDMI_OUT HDMI_OUT_inst
-	(
-		.clk(clk_25), 
-		.clk5x(clk_125), 
-		.R({VGA_R, 2'b00}), 
-		.G({VGA_G, 2'b00}), 
-		.B({VGA_B, 2'b00}), 
-		.hsync(VGA_HSYNC), 
-		.vsync(VGA_VSYNC), 
-		.de(s_displ_on[17+vgatext[1]]), 
-		.TMDS(TMDS)
-	 );
-	*/
+	assign CLK29491200  = clk_uart;
+	assign CLK44100x256 = clk_audio;
+
 	assign vga_r = VGA_R;
 	assign vga_g = VGA_G;
 	assign vga_b = VGA_B;
 	assign vga_hsync = VGA_HSYNC;
 	assign vga_vsync = VGA_VSYNC;
 	assign vga_blank = ~s_displ_on[17+vgatext[1]];
-	assign clk_pixel_x5 = clk_125;
 
 	SDRAM_16bit SDR
 	(
@@ -472,7 +445,7 @@ module system
 	(
 		.Data(sys_DOUT), 
 		.WrClock(clk_sdr), 
-		.RdClock(clk_25), 
+		.RdClock(clk_pixel), 
 		.WrEn(!crw && sys_rd_data_valid && !col_counter[4]), 
 		.RdEn(vrden), 
 		.Reset(1'b0), 
@@ -500,7 +473,7 @@ module system
 		.vcount(vcount), 
 		.vsync(VGA_VSYNC), 
 		.vblnk(vblnk), 
-		.clk(clk_25),
+		.clk(clk_pixel),
 		.ce(!Empty)
 	);
 	
@@ -512,7 +485,7 @@ module system
 		 .din(CPU_DOUT[7:0]), 
 		 .dout(VGA_DAC_DATA), 
 		 .CLK(clk_cpu), 
-		 .VGA_CLK(clk_25), 
+		 .VGA_CLK(clk_pixel), 
 		 .vga_addr((vgatext[1] | (~vga13[1] & planar[1])) ? VGA_INDEX : (vga13[1] ? hcount_pan[1] : hcount_pan[0]) ? fifo_dout[15:8] : fifo_dout[7:0]), 
 		 .color(DAC_COLOR),
 		 .vgatext(vgatextreq),
@@ -582,7 +555,7 @@ module system
 
 	sr_font VGA_FONT 
 	(
-	  .ClockA(clk_25), // input clka
+	  .ClockA(clk_pixel), // input clka
 	  .ClockEnA(1'b1),
 	  .WrA(1'b0), // input [0 : 0] wea
 	  .AddressA({fifo_dout[7:0], char_ln}), // input [11 : 0] addra
@@ -719,7 +692,7 @@ module system
 		 .addr(PORT_ADDR[1:0]), 
 		 .din(CPU_DOUT[7:0]), 
 		 .dout(TIMER_DOUT), 
-		 .CLK_25(clk_25), 
+		 .CLK_25(clk_beep), 
 		 .clk(clk_cpu), 
 		 .out0(timer_int), 
 		 .out2(timer_spk)
@@ -882,7 +855,7 @@ module system
 		
 	end
 	
-	always @ (posedge clk_25) begin
+	always @ (posedge clk_pixel) begin
 		s_displ_on <= {s_displ_on[17:0], displ_on};
 		exline <= vrdon ? 4'b1111 : (exline - vrden); // 32 extra bytes at the end of the scanline, for panning
 		
