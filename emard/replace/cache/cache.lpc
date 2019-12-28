@@ -1,0 +1,56 @@
+[Device]
+Family=ecp5u
+PartType=LFE5U-25F
+PartName=LFE5U-25F-6BG381C
+SpeedGrade=6
+Package=CABGA381
+OperatingCondition=COM
+Status=S
+
+[IP]
+VendorName=Lattice Semiconductor Corporation
+CoreType=LPM
+CoreStatus=Demo
+CoreName=RAM_DP_TRUE
+CoreRevision=7.5
+ModuleName=cache
+SourceFormat=verilog
+ParameterFileVersion=1.0
+Date=12/28/2019
+Time=22:32:51
+
+[Parameters]
+Verilog=1
+VHDL=0
+EDIF=1
+Destination=Synplicity
+Expression=BusA(0 to 7)
+Order=Big Endian [MSB:LSB]
+IO=0
+RAddress=4096
+RData=32
+WAddress=4096
+WData=32
+ROutputEn=0
+RClockEn=0
+WOutputEn=0
+WClockEn=0
+enByte=1
+ByteSize=8
+Optimization=Speed
+Reset=Sync
+Reset1=Sync
+Init=mem
+MemFile=bootstrap.mem
+MemFormat=hex
+EnECC=0
+Pipeline=0
+WriteA=ReadBeforeWrite
+WriteB=ReadBeforeWrite
+init_data=0
+
+[FilesGenerated]
+bootstrap.mem=mem
+
+[Command]
+cmd_line= -w -n cache -lang verilog -synth synplify -bus_exp 7 -bb -arch sa5p00 -type ramdp -device LFE5U-25F -aaddr_width 12 -widtha 32 -baddr_width 12 -widthb 32 -anum_words 4096 -bnum_words 4096 -byte 8 -cascade -1 -memfile bootstrap.mem -memformat hex -writemodeA READBEFOREWRITE -writemodeB READBEFOREWRITE

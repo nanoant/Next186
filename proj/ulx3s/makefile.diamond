@@ -94,7 +94,7 @@ SBX_FILES = \
   ../../Next186_SoC/sr_font/sr_font.sbx \
   ../../Next186_SoC/sndfifo/sndfifo.sbx \
   ../../Next186_SoC/q16/q16.sbx \
-  ../../Next186_SoC/cache/cache.sbx \
+  ../../emard/replace/cache/cache.sbx \
   ../../Next186_SoC/qdsp/qdsp.sbx \
   ../../Next186_SoC/instrmem/instrmem.sbx \
   ../../Next186_SoC/datamem16/datamem16.sbx \
