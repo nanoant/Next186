@@ -1,8 +1,18 @@
 # single image
 
-Here is contribution to have BIOS included in the HD image.
+Here is contribution to have BIOS included in the SD image.
 So only the HDD image has to be written at the start of SD card.
 BIOS doesn't have to be written to the last 8K of the SD card.
+
+Run the script "bios-to-hdd.sh" to generate SD image with BIOS.
+Write the image to SD card using linux with something like this:
+
+    dd if=/tmp/freedos.img of=/dev/mmcblk0
+
+ULX3S users can write the image to the start of SD card over WiFi with
+[esp32ecp5 micropython](https://github.com/emard/esp32ecp5):
+
+    ftp> put /tmp/freedos.img sd@0
 
 emard:
 
