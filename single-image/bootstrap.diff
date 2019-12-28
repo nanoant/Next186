@@ -1,0 +1,163 @@
+diff -Naur Next186_SoC.orig/186Code/BIOS/bootload_BIOS_SD/bootstrap.asm Next186_SoC/186Code/BIOS/bootload_BIOS_SD/bootstrap.asm
+--- Next186_SoC.orig/186Code/BIOS/bootload_BIOS_SD/bootstrap.asm	2016-09-26 14:42:28.401003600 +0200
++++ Next186_SoC/186Code/BIOS/bootload_BIOS_SD/bootstrap.asm	2018-02-14 22:57:25.033245500 +0100
+@@ -95,32 +95,29 @@
+ 		call		sdinit_
+ 		test		ax, ax
+ 		jz		short RS232
+-		mov		dx, ax
++		mov		dx, ax		; first try to read bios from end of card
+ 		shr		dx, 6
+ 		shl		ax, 10
+ 		mov		cx, BIOSSIZE       ;  sectors
+ 		sub		ax, cx
+ 		sbb		dx, 0
+-		xor		bx, bx       ; read BIOSSIZE/2 KB BIOS at 0f000h:0h
+-nextsect:      
+-		push		ax
+-		push		dx
+-		push		cx
+-		call		sdread_
+-		dec		cx
+-		pop		cx
+-		pop		dx
+-		pop		ax
+-		jnz		short RS232  ; cx was not 1
+-		add		ax, 1
+-		adc		dx, 0
+-		add		bx, 512    
+-		loop		nextsect
+-		cmp		word ptr ds:[0], 'eN'
+-		jne		short RS232             
+-		cmp		word ptr ds:[2], 'tx'
+-		je		short   BIOSOK
+-
++		xor		bx, bx		; read BIOSSIZE/2 KB BIOS at 0f000h:0h
++		call		sdbiosread_
++		test		cx,cx		; all sectors read?
++		jz		short BOK	; BIOSOK label too far
++		xor		dx,dx		; now try from sector 1
++		mov		ax,1
++nextbeg:
++		mov		cx, BIOSSIZE
++		xor		bx, bx		; read BIOSSIZE/2 KB BIOS at 0f000h:0h
++		call		sdbiosread_
++		test		cx,cx		; all sectors read?
++BOK:
++		jz		short BIOSOK
++		add		ax, 1		;try next sector, typically first partiton starts at sector 63
++		adc		dx, 0		;so try to search for bios start until sector 63-BIOSSIZE
++		cmp		ax,63-BIOSSIZE
++		jne		short nextbeg
+ RS232: 
+ 		mov		dx, 3c0h
+ 		mov		al, 10h
+@@ -314,6 +311,41 @@
+ 		call		sdrb        ; 8T
+ 		ret     
+ sdread_ endp
++
++;---------------------  read bios from sd card, check signature ----------------------
++sdbiosread_ proc near  ; DX:AX start sector, DS:BX start buffer, CX=number of sectors 
++		push		ax         ; read first sector and check bios signature
++		push		dx
++		push		cx
++		call		sdread_
++		dec		cx
++		pop		cx
++		pop		dx
++		pop		ax
++		jnz		short biosfail  ; cx was not 1  - sector reading failed
++		cmp		word ptr ds:[0], 'eN'
++		jne		short biosfail             
++		cmp		word ptr ds:[2], 'tx'
++		jne		short biosfail             
++ 		dec		cx       
++nextsect:
++		add		ax, 1             ; signature ok, read next sectors      
++		adc		dx, 0
++		add		bx, 512
++		push		ax 
++		push		dx
++		push		cx
++		call		sdread_
++		dec		cx
++		pop		cx
++		pop		dx
++		pop		ax
++		jnz		short biosfail  ; cx was not 1
++		loop		nextsect
++biosfail:    
++		ret
++sdbiosread_ endp
++
+         
+ ;---------------------  init SD ----------------------
+ sdinit_ proc near       ; returns AX = num kilosectors
+@@ -387,7 +419,7 @@
+ sdinit_ endp
+ 
+     
+-booterrmsg  db  'BIOS not present on SDCard last 8KB, waiting on RS232 (115200bps, f000:100) ...', 0
++booterrmsg  db  'BIOS not found on SDHC card, waiting on RS232 (115200bps, f000:100) ...', 0
+ SD_CMD0		db		40h, 0, 0, 0, 0, 95h
+ SD_CMD8		db		48h, 0, 0, 1, 0aah, 087h
+ SD_CMD9		db		49h, 0, 0, 0, 0, 0ffh
+diff -Naur Next186_SoC.orig/186Code/BIOS/bootload_BIOS_SD/bootstrap_print.c Next186_SoC/186Code/BIOS/bootload_BIOS_SD/bootstrap_print.c
+--- Next186_SoC.orig/186Code/BIOS/bootload_BIOS_SD/bootstrap_print.c	1970-01-01 01:00:00.000000000 +0100
++++ Next186_SoC/186Code/BIOS/bootload_BIOS_SD/bootstrap_print.c	2018-02-13 14:10:09.257871900 +0100
+@@ -0,0 +1,35 @@
++// utility for printing the boot code in Lattice Memory Initialization format (.mem)
++
++#include <stdio.h>
++
++//use just unix line feed as original Cache_bootload.mem, \n or \r\n could possibly work too
++#define EOL "\x0a"
++
++unsigned int buf[1024];
++int main(int argc, char *argv[])
++{
++  char *infname="bootstrap.com";
++  FILE *out=stdout;
++  if (argc>1) infname=argv[1];
++  if (argc>2) out=fopen(argv[2],"wb");
++	FILE *in = fopen(infname, "rb");
++	fseek(in, 256, 0);
++	size_t sz = fread(buf, 1, sizeof(buf), in) / sizeof(int); 
++	int i;
++	// header as per Lattice Memory Initialization format (.mem) http://srecord.sourceforge.net/man/man5/srec_mem.html
++	fprintf(out,
++		"#Format=Hex" EOL
++		"#Depth=256" EOL
++		"#Width=32" EOL
++		"#AddrRadix=3" EOL
++		"#DataRadix=3" EOL
++		"#Data" EOL
++	);
++	while(i<sz)
++	{
++		fprintf(out,"%08X" EOL, buf[i]); 
++		i=i+1;
++	}
++	fclose(in);
++  if (out!=stdout) fclose(out);
++}
+diff -Naur Next186_SoC.orig/186Code/BIOS/bootload_BIOS_SD/makeit.bat Next186_SoC/186Code/BIOS/bootload_BIOS_SD/makeit.bat
+--- Next186_SoC.orig/186Code/BIOS/bootload_BIOS_SD/makeit.bat	2013-06-06 16:19:02.943727100 +0200
++++ Next186_SoC/186Code/BIOS/bootload_BIOS_SD/makeit.bat	2018-02-13 14:20:34.871206300 +0100
+@@ -2,12 +2,15 @@
+ 
+     if exist "bootstrap.obj" del "bootstrap.obj"
+     if exist "bootstrap.com" del "bootstrap.com"
++    if exist "bootstrap.mem" del "bootstrap.mem"
+ 
+     \masm32\bin\ml /AT /c /Fl bootstrap.asm
+     if errorlevel 1 goto errasm
+ 
+     \masm32\bin\link16 /TINY bootstrap,bootstrap.com,,,,
+     if errorlevel 1 goto errlink
++    REM  i686-pc-mingw32-gcc -O3 bootstrap_print.c -o bootstrap_print
++    bootstrap_print.exe bootstrap.com bootstrap.mem
+     dir "bootstrap.*"
+     goto TheEnd
+ 
