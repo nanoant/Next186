@@ -39,18 +39,12 @@ CLK0_OPTIONS = \
   --clkout2_name=clk_125a \
   --clkout2=125 \
   --clkout3_name=clk_125p \
-  --clkout3=125 --phase3=120 \
+  --clkout3=125 --phase3=90 \
 
 # blue 85F:
-#  40 fail
-#  60 ok
-#  80 ok
-# 100 ok
-# 120 ok
-# 140 ok
-# 160 ok
-# 180 ok
-# 200 fail
+#  90 ok, recommended (center)
+#   0-180 ok
+# 190-359 fail
 
 CLK1_NAME = clk_aux
 CLK1_FILE_NAME = ../../emard/clocks/$(CLK1_NAME).v
