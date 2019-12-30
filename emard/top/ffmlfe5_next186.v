@@ -68,13 +68,13 @@ module ffmlfe5_next186
     wire clk_cpu, clk_sdr, clk_audio, clk_beep, clk_dsp, clk_uart;
     assign clk_cpu   = clk_50;   // 50-75 MHz
     assign clk_sdr   = clk_125;  // 125-166 MHz
-    assign dr_clk    = clk_125p; // 125-166 MHz, must be =clk_sdr phase shifted 180-225 deg
+    assign dr_clk    = clk_125p; // 125-166 MHz 90 deg, must be =clk_sdr phase shifted 0-200 deg
     assign clk_pixel = clk_25;   // should be 25 MHz
     assign clk_shift = clk_125;  // should be 125 MHz, must be clk_pixel*5
-    assign clk_dsp   = clk_25;   // should be 80 MHz, must be >= clk_cpu/2
+    assign clk_dsp   = clk_50;   // should be 80 MHz, must be >= clk_cpu/2
     assign clk_audio = clk_11;   // should be 11.2896 MHz
-    assign clk_beep  = clk_11;   // should be 11.2896 MHz
-    assign clk_uart  = clk_25;   // should be 29.4912 MHz
+    assign clk_beep  = clk_25;   // should be 25 MHz
+    assign clk_uart  = clk_25;   // should be 18.432 MHz
 
     assign sd_f_d[1] = 1'b1;
     assign sd_f_d[2] = 1'b1;

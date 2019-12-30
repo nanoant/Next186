@@ -33,7 +33,7 @@ CLK0_OPTIONS = \
   --clkout2_name=clk_125a \
   --clkout2=125 \
   --clkout3_name=clk_125p \
-  --clkout3=125 --phase3=200 \
+  --clkout3=125 --phase3=90 \
 
 CLK1_NAME = clk_aux
 CLK1_FILE_NAME = ../../emard/clocks/$(CLK1_NAME).v
