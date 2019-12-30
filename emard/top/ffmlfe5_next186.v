@@ -161,19 +161,14 @@ module ffmlfe5_next186
       .out_blue(tmds[0])
     );
 
-    // output TMDS SDR/DDR data to fake differential lanes
-    fake_differential
-    #(
-      .C_ddr(C_ddr)
-    )
-    fake_differential_instance
-    (
-      .clk_shift(clk_shift),
-      .in_clock(tmds[3]),
-      .in_red(tmds[2]),
-      .in_green(tmds[1]),
-      .in_blue(tmds[0]),
-      .out_p(vid_d_p),
-      .out_n()
-    );
+    // vendor-specific modules for DDR differential GPDI output
+    generate
+      wire [3:0] ddr_d;
+      genvar i;
+      for(i = 0; i < 4; i++)
+      begin
+        ODDRX1F tmds2ddr (.D0(tmds[i][0]), .D1(tmds[i][1]), .Q(ddr_d[i]), .SCLK(clk_shift), .RST(0));
+        OLVDS   ddr2gpdi (.A(ddr_d[i]), .Z(vid_d_p[i]) /*, .ZN(gpdi_dn[i]) */);
+      end
+    endgenerate
 endmodule
