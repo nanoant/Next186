@@ -21,7 +21,7 @@ TOP_MODULE = ffmlfe5_next186
 TOP_MODULE_FILE = ../../emard/top/$(TOP_MODULE).v
 
 CLK0_NAME = clk_system
-CLK0_FILE_NAME = clocks/$(CLK0_NAME).v
+CLK0_FILE_NAME = ../../emard/clocks/$(CLK0_NAME).v
 CLK0_OPTIONS = \
   --module=$(CLK0_NAME) \
   --clkin_name=clk_in \
@@ -36,7 +36,7 @@ CLK0_OPTIONS = \
   --clkout3=125 --phase3=200 \
 
 CLK1_NAME = clk_aux
-CLK1_FILE_NAME = clocks/$(CLK1_NAME).v
+CLK1_FILE_NAME = ../../emard/clocks/$(CLK1_NAME).v
 CLK1_OPTIONS = \
   --module=$(CLK1_NAME) \
   --clkin_name=clk_in \
