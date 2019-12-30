@@ -9,8 +9,6 @@ module ulx3s_next186
     output [3:0] audio_r,
 //    -- User GPIO (18 I/O pins) Header
     inout [27:2] gp, gn,  // GPIO Header pins available as one data block
-//    inout gpdi_sda,
-//    inout gpdi_scl,
 //    -- USB-serial FT231x interface 
     input  ftdi_txd,
     output ftdi_rxd,
@@ -26,7 +24,9 @@ module ulx3s_next186
     output  [1:0] sdram_dqm,
     output sdram_csn,
 //	-- DVI interface
-    output [3:0] gpdi_dp, gpdi_dn,
+    output [3:0] gpdi_dp, //gpdi_dn,
+//    inout gpdi_sda,
+//    inout gpdi_scl,
 //	-- SD/MMC Interface (Support either SPI or nibble-mode)
     output sd_clk,    // clk
     output sd_cmd,    // mosi
@@ -79,10 +79,10 @@ module ulx3s_next186
     wire clk_cpu, clk_sdr, clk_audio, clk_beep, clk_dsp, clk_uart;
     assign clk_cpu   = clk_50;   // 50-75 MHz
     assign clk_sdr   = clk_125;  // 125-166 MHz
-    assign sdram_clk = clk_125p; // 125-166 MHz, must be =clk_sdr phase shifted 180-225 deg
+    assign sdram_clk = clk_125p; // 125-166 MHz, must be =clk_sdr phase shifted 60-225 deg
     assign clk_pixel = clk_25;   // should be 25 MHz
     assign clk_shift = clk_125;  // should be 125 MHz, must be clk_pixel*5
-    assign clk_dsp   = clk_25;   // should be 80 MHz, must be >= clk_cpu/2
+    assign clk_dsp   = clk_50;   // should be 80 MHz, must be >= clk_cpu/2
     assign clk_audio = clk_11;   // should be 11.2896 MHz
     assign clk_beep  = clk_25;   // should be 25 MHz
     assign clk_uart  = clk_25;   // should be 29.4912 MHz
@@ -162,6 +162,7 @@ module ulx3s_next186
     );
 
     // output TMDS SDR/DDR data to fake differential lanes
+    /*
     fake_differential
     #(
       .C_ddr(C_ddr)
@@ -176,4 +177,15 @@ module ulx3s_next186
       .out_p(gpdi_dp),
       .out_n(gpdi_dn)
     );
+    */
+    // vendor-specific modules for DDR differential GPDI output
+    generate
+      wire [3:0] ddr_d;
+      genvar i;
+      for(i = 0; i < 4; i++)
+      begin
+        ODDRX1F tmds2ddr (.D0(tmds[i][0]), .D1(tmds[i][1]), .Q(ddr_d[i]), .SCLK(clk_shift), .RST(0));
+        OLVDS   ddr2gpdi (.A(ddr_d[i]), .Z(gpdi_dp[i]) /*, .ZN(gpdi_dn[i]) */);
+      end
+    endgenerate
 endmodule

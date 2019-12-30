@@ -2,7 +2,7 @@
 PROJECT = next186
 BOARD = ulx3s
 # 12 25 45 85
-FPGA_SIZE = 25
+FPGA_SIZE = 85
 FPGA_PACKAGE = 6bg381c
 # config flash: 1:SPI (standard), 4:QSPI (quad)
 FLASH_SPI = 4
@@ -22,7 +22,7 @@ OPENOCD_INTERFACE=$(SCRIPTS)/ft231x.ocd
 #OPENOCD_INTERFACE=$(SCRIPTS)/ft2232.ocd
 
 # ******* design files *******
-CONSTRAINTS = ../../constraints/ulx3s_v20_segpdi.lpf
+CONSTRAINTS = ../../constraints/ulx3s_v20_difgpdi.lpf
 TOP_MODULE = ulx3s_next186
 TOP_MODULE_FILE = ../../emard/top/$(TOP_MODULE).v
 
@@ -39,7 +39,18 @@ CLK0_OPTIONS = \
   --clkout2_name=clk_125a \
   --clkout2=125 \
   --clkout3_name=clk_125p \
-  --clkout3=125 --phase3=180 \
+  --clkout3=125 --phase3=120 \
+
+# blue 85F:
+#  40 fail
+#  60 ok
+#  80 ok
+# 100 ok
+# 120 ok
+# 140 ok
+# 160 ok
+# 180 ok
+# 200 fail
 
 CLK1_NAME = clk_aux
 CLK1_FILE_NAME = ../../emard/clocks/$(CLK1_NAME).v
@@ -82,8 +93,8 @@ VERILOG_FILES = \
   ../../Next186_SoC/NextZ80/NextZ80ALU.v \
   ../../Next186_SoC/NextZ80/NextZ80CPU.v \
   ../../Next186_SoC/NextZ80/NextZ80Reg.v \
-  ../../emard/dvi/fake_differential.v \
 
+#  ../../emard/dvi/fake_differential.v \
 
 SBX_FILES = \
   ../../Next186_SoC/dcm/dcm.sbx \
