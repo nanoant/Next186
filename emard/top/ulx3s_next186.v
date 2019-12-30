@@ -79,13 +79,13 @@ module ulx3s_next186
     wire clk_cpu, clk_sdr, clk_audio, clk_beep, clk_dsp, clk_uart;
     assign clk_cpu   = clk_50;   // 50-75 MHz
     assign clk_sdr   = clk_125;  // 125-166 MHz
-    assign sdram_clk = clk_125p; // 125-166 MHz, must be =clk_sdr phase shifted 60-225 deg
+    assign sdram_clk = clk_125p; // 125-166 MHz 100 deg, must be =clk_sdr phase shifted 0-200 deg
     assign clk_pixel = clk_25;   // should be 25 MHz
     assign clk_shift = clk_125;  // should be 125 MHz, must be clk_pixel*5
     assign clk_dsp   = clk_50;   // should be 80 MHz, must be >= clk_cpu/2
     assign clk_audio = clk_11;   // should be 11.2896 MHz
     assign clk_beep  = clk_25;   // should be 25 MHz
-    assign clk_uart  = clk_25;   // should be 29.4912 MHz
+    assign clk_uart  = clk_25;   // should be 18.432 MHz
 
     system sys_inst
     ( 
@@ -95,7 +95,7 @@ module ulx3s_next186
       .clk_dsp(clk_dsp),           //  25-80 MHz (>=clk_cpu/2) 32-bit
       .clk_audio(clk_audio),       //  11.2896 MHz (44100*256)
       .clk_beep(clk_beep),         //  25 MHz beep timer
-      .clk_uart(clk_uart),         //  29.4912 MHz
+      .clk_uart(clk_uart),         //  18.432 MHz RS232
 
       .vga_r(vga_r),
       .vga_g(vga_g),
@@ -161,23 +161,6 @@ module ulx3s_next186
       .out_blue(tmds[0])
     );
 
-    // output TMDS SDR/DDR data to fake differential lanes
-    /*
-    fake_differential
-    #(
-      .C_ddr(C_ddr)
-    )
-    fake_differential_instance
-    (
-      .clk_shift(clk_shift),
-      .in_clock(tmds[3]),
-      .in_red(tmds[2]),
-      .in_green(tmds[1]),
-      .in_blue(tmds[0]),
-      .out_p(gpdi_dp),
-      .out_n(gpdi_dn)
-    );
-    */
     // vendor-specific modules for DDR differential GPDI output
     generate
       wire [3:0] ddr_d;
