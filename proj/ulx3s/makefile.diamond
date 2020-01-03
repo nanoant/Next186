@@ -39,10 +39,16 @@ CLK0_OPTIONS = \
   --clkout2_name=clk_125a \
   --clkout2=125 \
   --clkout3_name=clk_125p \
-  --clkout3=125 --phase3=90 \
+  --clkout3=125 --phase3=150 \
+
+# phase 150 should be good for all
+
+# green 12F:
+#   0-99  fail
+# 120-315 ok
+# 330-359 fail
 
 # blue 85F:
-#  90 ok, recommended (center)
 #   0-180 ok
 # 190-359 fail
 
