@@ -36,8 +36,8 @@ CLK0_OPTIONS = \
   --clkout0=125 \
   --clkout1_name=clk_25 \
   --clkout1=25 \
-  --clkout2_name=clk_125a \
-  --clkout2=125 \
+  --clkout2_name=clk_48 \
+  --clkout2=48.076923 \
   --clkout3_name=clk_125p \
   --clkout3=125 --phase3=150 \
 
@@ -90,9 +90,11 @@ VERILOG_FILES = \
   ../../Next186_SoC/DSP32.v\
   ../../Next186_SoC/opl3.v \
   ../../Next186_SoC/opl3seq.v \
-  ../../Next186_SoC/NextZ80/NextZ80ALU.v \
-  ../../Next186_SoC/NextZ80/NextZ80CPU.v \
-  ../../Next186_SoC/NextZ80/NextZ80Reg.v \
+  ../../Next186_SoC/NextZ80CPU.v \
+  ../../Next186_SoC/Next8080CPU.v \
+  ../../Next186_SoC/usb_phy.v \
+  ../../Next186_SoC/KB_8042_usb.v \
+  ../../Next186_SoC/q1.v \
 
 #  ../../emard/dvi/fake_differential.v \
 
@@ -112,6 +114,8 @@ SBX_FILES = \
   ../../Next186_SoC/q16f/q16f.sbx \
   ../../Next186_SoC/opl3_mem/opl3_mem.sbx \
   ../../Next186_SoC/opl3_in/opl3_in.sbx \
+  ../../Next186_SoC/fifo_usb_io/fifo_usb_io.sbx \
+  ../../Next186_SoC/blk_mem_usb/blk_mem_usb.sbx \
 
 #  $(CLK0_FILE_NAME) \
 #  $(CLK1_FILE_NAME) \

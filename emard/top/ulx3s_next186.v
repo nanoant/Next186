@@ -64,6 +64,7 @@ module ulx3s_next186
 	.clk_in(clk_25mhz),
 	.clk_25(clk_25),
 	.clk_125(clk_125),
+  .clk_48(clk_48),
 	.clk_125p(clk_125p)
     );
 
@@ -82,7 +83,7 @@ module ulx3s_next186
     assign sdram_clk = clk_125p; // 125-166 MHz 90 deg, must be =clk_sdr phase shifted 0-200 deg
     assign clk_pixel = clk_25;   // should be 25 MHz
     assign clk_shift = clk_125;  // should be 125 MHz, must be clk_pixel*5
-    assign clk_dsp   = clk_50;   // should be 80 MHz, must be >= clk_cpu/2
+    assign clk_dsp   = clk_48;   // should be 80 MHz, must be >= clk_cpu/2
     assign clk_audio = clk_11;   // should be 11.2896 MHz
     assign clk_beep  = clk_25;   // should be 25 MHz
     assign clk_uart  = clk_25;   // should be 18.432 MHz
@@ -122,12 +123,11 @@ module ulx3s_next186
       .AUD_L(audio_l[C_loudness]),
       .AUD_R(audio_r[C_loudness]),
 
-      // Keyboard
-      .PS2_CLK1(usb_fpga_bd_dp),
-      .PS2_DATA1(usb_fpga_bd_dn),
-      // Mouse
-      .PS2_CLK2(gn[21]),   // mouse clock US3, flat cable on pins up
-      .PS2_DATA2(gp[21]), // mouse data US3, flat cable on pins up
+      // USB Keyboard Mouse
+      .USB0_DP(usb_fpga_bd_dp),
+      .USB0_DM(usb_fpga_bd_dn),
+      .USB1_DP(gn[21]), // US3, flat cable on pins up
+      .USB1_DM(gp[21]), // US3, flat cable on pins up
 
       .RS232_HOST_RXD(),
       .RS232_HOST_TXD(),

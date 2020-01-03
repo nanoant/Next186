@@ -54,6 +54,7 @@
 // Aug2017 - added Line Compare Register
 // Sep2017 - VGA barrel shifter, NMI on IRQ
 // Oct2017 - added VGA VDE register, improved 400/480 lines configuration based on VDE
+// Mar2019 - Low speed USB for mouse and kb (hot plug, hot swap)
 //////////////////////////////////////////////////////////////////////////////////
 
 /* ----------------- implemented ports -------------------
@@ -180,10 +181,10 @@ module system
 		 
 		 output AUD_L,
 		 output AUD_R,
-	 	 inout PS2_CLK1,
-		 inout PS2_CLK2,
-		 inout PS2_DATA1,
-		 inout PS2_DATA2,
+		inout USB0_DM, 
+		inout USB0_DP,
+		inout USB1_DM, 
+		inout USB1_DP,
 		 
 		 inout [7:0]GPIO
     );
@@ -595,21 +596,22 @@ module system
 	wire I_KB;
 	wire I_MOUSE;
 	wire KB_RST;
-	KB_Mouse_8042 KB_Mouse 
+	KB_Mouse_8042_usb KB_Mouse 
 	(
 		 .CS(IORQ && CPU_CE && KB_OE), // 60h, 64h
 		 .WR(WR), 
 		 .cmd(PORT_ADDR[2]), // 64h
 		 .din(CPU_DOUT[7:0]), 
 		 .dout(KB_DOUT), 
-		 .clk(clk_cpu), 
+		 .clk(clk_cpu),
+		 .clk_usb(clk_dsp),	// 48Mhz
 		 .I_KB(I_KB), 
 		 .I_MOUSE(I_MOUSE), 
 		 .CPU_RST(KB_RST), 
-		 .PS2_CLK1(PS2_CLK1), 
-		 .PS2_CLK2(PS2_CLK2), 
-		 .PS2_DATA1(PS2_DATA1), 
-		 .PS2_DATA2(PS2_DATA2)
+		.USB0_DM(USB0_DM), 
+		.USB0_DP(USB0_DP),
+		.USB1_DM(USB1_DM), 
+		.USB1_DP(USB1_DP)
 	);
 	
 	wire [7:0]PIC_IVECT;
